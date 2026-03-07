@@ -8,12 +8,14 @@ on:
 jobs:
   bump:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Github prevents workflow triggers on pushes made by GITHUB_TOKEN.
+          # You will have to issue a separate PAT with `contents: write` permissions.
+          token: ${{ secrets.PAT }}
 
       - name: Fetch latest versions
         id: latest
