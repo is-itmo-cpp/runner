@@ -33,12 +33,13 @@ jobs:
 
       - name: Commit and push
         run: |
-          git config user.name "itmogus[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add versions.env
-          git diff --cached --quiet && { 
+          git diff --quiet versions.env && {
             echo "Runner versions are already up-to-date."
             exit 0
           }
+          echo "Runner versions are outdated will be bumped."
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add versions.env
           git commit -m "chore: bump runner versions"
           git push

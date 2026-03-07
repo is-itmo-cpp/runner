@@ -22,6 +22,11 @@ jobs:
       - name: Load versions
         run: cat versions.env >> $GITHUB_ENV
 
+      - name: Show versions
+        run: |
+          echo "Current runner version: $RUNNER_VERSION"
+          echo "Current hooks version: $RUNNER_CONTAINER_HOOKS_VERSION"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
