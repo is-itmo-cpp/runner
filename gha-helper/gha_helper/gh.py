@@ -1,14 +1,30 @@
 import json
 import os
 from datetime import datetime, timezone
-from typing import Any
-from zoneinfo import ZoneInfo
+from pathlib import Path
+from typing import Any, Optional
 
 
-class CICDInputError(Exception): pass
+class CICDInputError(Exception):
+    pass
 
 
 Unset = object()
+
+
+def _escape_data(s) -> str:
+    return str(s).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+
+
+def _escape_property(s) -> str:
+    return (
+        str(s)
+        .replace("%", "%25")
+        .replace("\r", "%0D")
+        .replace("\n", "%0A")
+        .replace(":", "%3A")
+        .replace(",", "%2C")
+    )
 
 
 class Input:
@@ -17,8 +33,8 @@ class Input:
 
         if env is Unset:
             raise CICDInputError(f"Cannot find input {name}. Previous jobs have probably failed.")
-                                                                                    
-        return env                                                                  
+
+        return env
 
     def get_timestamp(self, name: str) -> datetime:
         env = os.environ[name]
@@ -28,12 +44,11 @@ class Input:
         except:
             return datetime.strptime(env, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
 
-                                                                                    
-    def get_json(self, name: str, default=Unset):                                   
-        env = os.getenv(name,)
-                                                                                    
-        if not env:                                                             
-            if default is Unset:                                                    
+    def get_json(self, name: str, default=Unset):
+        env = os.getenv(name)
+
+        if not env:
+            if default is Unset:
                 raise CICDInputError(f"Cannot find input {name}. Previous jobs have probably failed.")
             else:
                 return default
@@ -52,5 +67,63 @@ class Output:
             f.write(f"{name}={data}\n")
 
 
+class Annotation:
+    def error(
+        self,
+        message: str,
+        file: Optional[Path | str] = None,
+        line: Optional[int] = None,
+        col: Optional[int] = None,
+    ):
+        self._print("error", message, file, line, col)
+
+    def warning(
+        self,
+        message: str,
+        file: Optional[Path | str] = None,
+        line: Optional[int] = None,
+        col: Optional[int] = None,
+    ):
+        self._print("warning", message, file, line, col)
+
+    def notice(
+        self,
+        message: str,
+        file: Optional[Path | str] = None,
+        line: Optional[int] = None,
+        col: Optional[int] = None,
+    ):
+        self._print("notice", message, file, line, col)
+
+    def _print(
+        self,
+        level: str,
+        message: str,
+        file: Optional[Path | str] = None,
+        line: Optional[int] = None,
+        col: Optional[int] = None,
+    ):
+        if file is not None:
+            print(f"In file {file}:{line}:{col}:")
+
+        props = []
+
+        if file is not None:
+            props.append(f"file={_escape_property(file)}")
+
+        if line is not None:
+            props.append(f"line={line}")
+
+        if col is not None:
+            props.append(f"col={col}")
+
+        props_str = ",".join(props)
+        if props_str:
+            props_str = " " + props_str
+
+        print(f"::{level}{props_str}::{_escape_data(message)}")
+
+
 input = Input()
 output = Output()
+annotation = Annotation()
