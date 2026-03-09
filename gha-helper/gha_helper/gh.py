@@ -44,12 +44,12 @@ class Input:
 class Output:
     def save(self, name: str, value: Any):
         with open(os.environ["GITHUB_OUTPUT"], "w+") as f:
-            f.write(f"{name}={value}")
+            f.write(f"{name}={value}\n")
 
     def save_json(self, name: str, value: Any):
-        data = json.dumps(value, separators=(',', ':'))
+        data = json.dumps(value, separators=(",", ":"))
         with open(os.environ["GITHUB_OUTPUT"], "w+") as f:
-            f.write(f"{name}={data}")
+            f.write(f"{name}={data}\n")
 
 
 input = Input()
