@@ -42,7 +42,9 @@ ENV ImageOS=ubuntu24
 
 RUN apt update -y \
     && apt install -y adduser \
-        cmake build-essential clang-19 clang-tidy-19 libgtest-dev libgmock-dev gcovr \
+        cmake build-essential clang-19 clang-tidy-19 \
+        libgtest-dev libgmock-dev gcovr \
+        libssl-dev libcurl4-openssl-dev nlohmann-json3-dev \
         nodejs python3 python3-pip python3-tabulate python3-wcwidth \
         git jq curl
 
