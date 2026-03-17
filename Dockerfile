@@ -3,13 +3,13 @@
 #
 # Some things are stripped down, some are added. Here are the main differences:
 #
-# 1. We use Debian Noble instead of Jammy (for newer packages).
+# 1. We use Ubuntu Resolution (and therefore dotnet11) instead of Jammy (for newer packages).
 # 2. No docker-in-docker.
 # 3. No sudo.
 # 4. CMake, build-essential, clang-19, gtest, and gcovr come preinstalled.
 # 5. Some python packages we need for generating the report are preinstalled too.
 
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble AS build
+FROM mcr.microsoft.com/dotnet/runtime-deps:11.0-preview-resolute AS build
 
 ARG RUNNER_VERSION
 ARG RUNNER_CONTAINER_HOOKS_VERSION
@@ -33,16 +33,17 @@ RUN test -n "${RUNNER_CONTAINER_HOOKS_VERSION}" || (echo "RUNNER_CONTAINER_HOOKS
     && rm runner-container-hooks.zip
 
 
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-noble
+FROM mcr.microsoft.com/dotnet/runtime-deps:11.0-preview-resolute
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV RUNNER_MANUALLY_TRAP_SIG=1
 ENV ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT=1
-ENV ImageOS=ubuntu24
+ENV ImageOS=ubuntu26
 
+# TODO: remove clang-19
 RUN apt update -y \
     && apt install -y adduser \
-        cmake build-essential clang-19 clang-tidy-19 \
+        cmake build-essential clang-19 clang-tidy-19 clang-21 clang-tidy-21 \
         libgtest-dev libgmock-dev gcovr \
         libssl-dev libcurl4-openssl-dev nlohmann-json3-dev \
         nodejs python3 python3-pip python3-tabulate python3-wcwidth \
